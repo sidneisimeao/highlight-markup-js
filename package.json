@@ -4,7 +4,10 @@
   "description": "One Paragraph of project description goes here",
   "main": ".eslintrc.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "start": "webpack-dev-server --open --inline"
   },
   "repository": {
     "type": "git",
