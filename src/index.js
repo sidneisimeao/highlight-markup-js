@@ -7,14 +7,14 @@ export default class HightlightMarkup {
       let selection = window.getSelection();
       let range = selection.getRangeAt(0);
 
-      let startContainer = range.endContainer;
+      let startContainer = range.startContainer;
       let endContainer = range.endContainer;
       let currentNode = '';
       let tagNames = [];
 
       if (!range.collapsed) {
         var textNodeIndex = this._getChildNodeIndexOf(endContainer);
-        currentNode = startContainer;
+        currentNode = endContainer;
 
         while (currentNode) {
           var tagName = currentNode.tagName;
@@ -27,7 +27,12 @@ export default class HightlightMarkup {
         }
 
         console.log(textNodeIndex);
-        console.log(tagNames);
+        console.log(
+          tagNames
+            .reverse()
+            .join(' > ')
+            .toLowerCase()
+        );
       }
     });
   }
@@ -41,7 +46,7 @@ export default class HightlightMarkup {
    */
   _createSelectorByNthOfType = node => {
     let elementsWithSameTag = 0;
-    let nthIndex = `${node.tagName}`;
+    let selector = `${node.tagName}`;
 
     let childNodes = this._getChildNodesOfParentNode(node);
 
@@ -55,9 +60,9 @@ export default class HightlightMarkup {
       }
     }
     if (elementsWithSameTag > 1) {
-      nthIndex = `${node.tagName}:nth-of-type(${elementsWithSameTag})`;
+      selector = `${node.tagName}:nth-of-type(${elementsWithSameTag})`;
     }
-    return nthIndex;
+    return selector;
   };
 
   /**
