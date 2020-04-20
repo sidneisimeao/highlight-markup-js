@@ -13,24 +13,14 @@ export default class HightlightMarkup {
       let tagNames = [];
 
       if (!range.collapsed) {
-        var textNodeIndex = this.getChildNodeIndexOf(endContainer);
+        var textNodeIndex = this._getChildNodeIndexOf(endContainer);
         currentNode = startContainer;
 
         while (currentNode) {
           var tagName = currentNode.tagName;
 
           if (tagName) {
-            var nthIndex = this.getPositionNthOfType(currentNode);
-
-            console.log(nthIndex);
-
-            var selector = tagName;
-
-            if (nthIndex > 1) {
-              selector += ':nth-of-type(' + nthIndex + ')';
-            }
-
-            tagNames.push(selector);
+            tagNames.push(this._createSelectorByNthOfType(currentNode));
           }
 
           currentNode = currentNode.parentNode;
@@ -47,21 +37,27 @@ export default class HightlightMarkup {
    * seus irmãos do mesmo tipo
    * @param Element node
    * @return int
-   * example: getPositionNthOfType(p) => div > h1 + p > i + p // 1 or 2
+   * @example getPositionNthOfType(p) => div > h1 + p > i + p // p:nth-of-type(2)
    */
-  getPositionNthOfType = node => {
-    let childNodes = this.getChildNodesOfParentNode(node);
-
+  _createSelectorByNthOfType = node => {
     let elementsWithSameTag = 0;
+    let nthIndex = `${node.tagName}`;
+
+    let childNodes = this._getChildNodesOfParentNode(node);
 
     for (let currentNode of childNodes) {
       if (currentNode === node) {
-        return ++elementsWithSameTag;
+        elementsWithSameTag++;
+        break;
       }
       if (currentNode.tagName === node.tagName) {
         elementsWithSameTag++;
       }
     }
+    if (elementsWithSameTag > 1) {
+      nthIndex = `${node.tagName}:nth-of-type(${elementsWithSameTag})`;
+    }
+    return nthIndex;
   };
 
   /**
@@ -69,21 +65,24 @@ export default class HightlightMarkup {
    * em relação ao seu pai
    * @param Element node
    * @return int
-   * example: getChildNodeIndexOf(p) => div > h1 + p > i + div // 1
+   * @example getChildNodeIndexOf(p) => div > h1 + p > i + div // 1
    */
-  getChildNodeIndexOf = node => {
-    let childNodes = this.getChildNodesOfParentNode(node);
+  _getChildNodeIndexOf = node => {
+    let childNodes = this._getChildNodesOfParentNode(node);
+    let nodeIndexOf = 0;
 
     for (let [indexOf, currentNode] of Object.entries(childNodes)) {
       if (currentNode === node) {
-        return indexOf;
+        nodeIndexOf = indexOf;
+        break;
       }
     }
+    return nodeIndexOf;
   };
 
   /**
    * @description Acessa o elemento pai e retorna os seus filhos
    * @param Element node
    */
-  getChildNodesOfParentNode = ({ parentNode: { childNodes } }) => childNodes;
+  _getChildNodesOfParentNode = ({ parentNode: { childNodes } }) => childNodes;
 }
