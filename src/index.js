@@ -1,93 +1,48 @@
+import localForage from 'localforage';
+import HandleRange from './handle-range';
+import { debounceTime, baseUrl } from './utils';
+
 /**
  * @class HightlightMarkup
  */
 export default class HightlightMarkup {
   constructor() {
-    document.addEventListener('selectionchange', e => {
-      let selection = window.getSelection();
-      let range = selection.getRangeAt(0);
-
-      let startContainer = range.startContainer;
-      let endContainer = range.endContainer;
-      let currentNode = '';
-      let tagNames = [];
-
-      if (!range.collapsed) {
-        var textNodeIndex = this._getChildNodeIndexOf(endContainer);
-        currentNode = endContainer;
-
-        while (currentNode) {
-          var tagName = currentNode.tagName;
-
-          if (tagName) {
-            tagNames.push(this._createSelectorByNthOfType(currentNode));
-          }
-
-          currentNode = currentNode.parentNode;
-        }
-
-        console.log(textNodeIndex);
-        console.log(
-          tagNames
-            .reverse()
-            .join(' > ')
-            .toLowerCase()
-        );
-      }
-    });
+    this.init();
   }
 
-  /**
-   * Retorna a posição do elemento em relação aos
-   * seus irmãos do mesmo tipo
-   * @param Element node
-   * @return int
-   * @example getPositionNthOfType(p) => div > h1 + p > i + p // p:nth-of-type(2)
-   */
-  _createSelectorByNthOfType = node => {
-    let elementsWithSameTag = 0;
-    let selector = `${node.tagName}`;
+  init = () => {
+    try {
+      document.addEventListener(
+        'selectionchange',
+        debounceTime(e => {
+          let selection = window.getSelection();
 
-    let childNodes = this._getChildNodesOfParentNode(node);
+          for (let i = 0; i < selection.rangeCount; i++) {
+            let range = selection.getRangeAt(0);
 
-    for (let currentNode of childNodes) {
-      if (currentNode === node) {
-        elementsWithSameTag++;
-        break;
-      }
-      if (currentNode.tagName === node.tagName) {
-        elementsWithSameTag++;
-      }
-    }
-    if (elementsWithSameTag > 1) {
-      selector = `${node.tagName}:nth-of-type(${elementsWithSameTag})`;
-    }
-    return selector;
+            const handleRange = new HandleRange(range);
+
+            this.createSelection(handleRange.selectorStart);
+          }
+        }, 1000)
+      );
+    } catch (error) {}
   };
 
-  /**
-   * Recebe o elemento e retorna sua posição
-   * em relação ao seu pai
-   * @param Element node
-   * @return int
-   * @example getChildNodeIndexOf(p) => div > h1 + p > i + div // 1
-   */
-  _getChildNodeIndexOf = node => {
-    let childNodes = this._getChildNodesOfParentNode(node);
-    let nodeIndexOf = 0;
-
-    for (let [indexOf, currentNode] of Object.entries(childNodes)) {
-      if (currentNode === node) {
-        nodeIndexOf = indexOf;
-        break;
-      }
+  createSelection = async currentSelection => {
+    try {
+      const value = await localForage.setItem(
+        baseUrl,
+        JSON.stringify({
+          selection: currentSelection,
+        })
+      );
+      // This code runs once the value has been loaded
+      // from the offline store.
+      console.log(value);
+    } catch (err) {
+      // This code runs if there were any errors.
+      console.log(err);
     }
-    return nodeIndexOf;
   };
-
-  /**
-   * @description Acessa o elemento pai e retorna os seus filhos
-   * @param Element node
-   */
-  _getChildNodesOfParentNode = ({ parentNode: { childNodes } }) => childNodes;
 }
