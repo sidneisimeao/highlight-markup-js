@@ -13,12 +13,10 @@ class HandleSelect {
 
         for (let i = 0; i < selection.rangeCount; i++) {
           let range = selection.getRangeAt(0);
-
           if (!range.collapsed) {
-            console.log(range.cloneContents());
-            //  const handleRange = new HandleRange(range);
+            const handleRange = new HandleRange(range);
 
-            // this._saveSelection(handleRange);
+            this._saveSelection(handleRange);
           }
         }
       }, 1000)
@@ -77,40 +75,7 @@ class HandleSelect {
       range.setStart(elementStart.childNodes[textNodeIndexStart], startOffset);
       range.setEnd(elementEnd.childNodes[textNodeIndexEnd], endOffset);
 
-      const documentFragment = range.cloneContents();
-
-      const newDocumentFragment = document.createDocumentFragment();
-
-      for (let key in documentFragment.childNodes) {
-        if (documentFragment.childNodes.hasOwnProperty(key)) {
-          let element = documentFragment.childNodes[key];
-
-          let newelement = element.cloneNode(true);
-          /*
-          let span = document.createElement('span');
-          span.classList.add('hightlight');
-          span.appendChild(element);
-          */
-
-          newDocumentFragment.appendChild(newelement);
-
-          //  break;
-          /* console.log(element);
-          range.selectNodeContents(element);
-
-          range.deleteContents();
-          var node = range.createContextualFragment(
-            '<span><font color="red">Cú</font></span>'
-          );
-          range.insertNode(node);
-          return;*/
-        }
-      }
-
-      //  console.log(newDocumentFragment);
-
-      //   range.deleteContents();
-      //   range.insertNode(newDocumentFragment);
+      document.getSelection().addRange(range);
     }
   };
 }
